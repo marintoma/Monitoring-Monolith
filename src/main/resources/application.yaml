@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: monitoring
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/monitoring
+    username: monitoring
+    password: monitoring
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    open-in-view: false
