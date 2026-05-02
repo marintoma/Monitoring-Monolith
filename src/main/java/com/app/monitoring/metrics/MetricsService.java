@@ -3,7 +3,9 @@ package com.app.monitoring.metrics;
 import com.app.monitoring.metrics.dto.MetricRequest;
 import com.app.monitoring.metrics.dto.MetricResponse;
 import com.app.monitoring.metrics.entity.Metric;
+import com.app.monitoring.notifications.events.MetricIngestedEvent;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import java.time.Instant;
 public class MetricsService {
 
     private final MetricsRepository repo;
+    private final ApplicationEventPublisher publisher;
 
     public MetricResponse ingest(MetricRequest metricRequest) {
         Metric metric = Metric.builder()
@@ -24,7 +27,8 @@ public class MetricsService {
                 .timestamp(metricRequest.timestamp())
                 .build();
 
-        repo.save(metric);
+        Metric saved = repo.save(metric);
+        publisher.publishEvent(new MetricIngestedEvent(this, saved));
 
         return toResponse(metric);
     }
