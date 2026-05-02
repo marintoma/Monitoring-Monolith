@@ -7,6 +7,11 @@ spring:
     username: monitoring
     password: monitoring
 
+  data:
+    web:
+      pageable:
+        max-page-size: 200
+
   jpa:
     hibernate:
       ddl-auto: none

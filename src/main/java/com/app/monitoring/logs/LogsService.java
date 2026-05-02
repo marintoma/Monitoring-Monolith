@@ -4,10 +4,11 @@ import com.app.monitoring.logs.dto.LogRequest;
 import com.app.monitoring.logs.dto.LogResponse;
 import com.app.monitoring.logs.entity.Log;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,39 +26,29 @@ public class LogsService {
         return toResponse(repo.save(log));
     }
 
-    public List<LogResponse> findByServiceName(String serviceName) {
-        return repo.findByServiceName(serviceName)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<LogResponse> findByServiceName(String serviceName, Pageable pageable) {
+        return repo.findByServiceName(serviceName, pageable)
+                .map(this::toResponse);
     }
 
-    public List<LogResponse> findByLevel(LogLevel level) {
-        return repo.findByLevel(level)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<LogResponse> findByLevel(LogLevel level, Pageable pageable) {
+        return repo.findByLevel(level, pageable)
+                .map(this::toResponse);
     }
 
-    public List<LogResponse> findByTimeRange(Instant from, Instant to) {
-        return repo.findByTimestampBetween(from, to)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<LogResponse> findByTimeRange(Instant from, Instant to, Pageable pageable) {
+        return repo.findByTimestampBetween(from, to, pageable)
+                .map(this::toResponse);
     }
 
-    public List<LogResponse> findByServiceNameAndTimeRange(String serviceName, Instant from, Instant to) {
-        return repo.findByServiceNameAndTimestampBetween(serviceName, from, to)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<LogResponse> findByServiceNameAndTimeRange(String serviceName, Instant from, Instant to, Pageable pageable) {
+        return repo.findByServiceNameAndTimestampBetween(serviceName, from, to, pageable)
+                .map(this::toResponse);
     }
 
-    public List<LogResponse> findByLevelAndTimeRange(LogLevel level, Instant from, Instant to) {
-        return repo.findByLevelAndTimestampBetween(level, from, to)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<LogResponse> findByLevelAndTimeRange(LogLevel level, Instant from, Instant to, Pageable pageable) {
+        return repo.findByLevelAndTimestampBetween(level, from, to, pageable)
+                .map(this::toResponse);
     }
 
     private LogResponse toResponse(Log log) {

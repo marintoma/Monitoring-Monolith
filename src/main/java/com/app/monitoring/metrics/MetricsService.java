@@ -4,10 +4,11 @@ import com.app.monitoring.metrics.dto.MetricRequest;
 import com.app.monitoring.metrics.dto.MetricResponse;
 import com.app.monitoring.metrics.entity.Metric;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -28,32 +29,24 @@ public class MetricsService {
         return toResponse(metric);
     }
 
-    public List<MetricResponse> findByServiceName(String serviceName) {
-        return repo.findByServiceName(serviceName)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<MetricResponse> findByServiceName(String serviceName, Pageable pageable) {
+        return repo.findByServiceName(serviceName, pageable)
+                .map(this::toResponse);
     }
 
-    public List<MetricResponse> findByName(String name) {
-        return repo.findByName(name)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<MetricResponse> findByName(String name, Pageable pageable) {
+        return repo.findByName(name, pageable)
+                .map(this::toResponse);
     }
 
-    public List<MetricResponse> findByTimestampBetween(Instant from, Instant to) {
-        return repo.findByTimestampBetween(from, to)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<MetricResponse> findByTimestampBetween(Instant from, Instant to, Pageable pageable) {
+        return repo.findByTimestampBetween(from, to, pageable)
+                .map(this::toResponse);
     }
 
-    public List<MetricResponse> findByServiceNameAndTimeRange(String serviceName, Instant from, Instant to) {
-        return repo.findByServiceNameAndTimestampBetween(serviceName, from, to)
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<MetricResponse> findByServiceNameAndTimeRange(String serviceName, Instant from, Instant to, Pageable pageable) {
+        return repo.findByServiceNameAndTimestampBetween(serviceName, from, to, pageable)
+                .map(this::toResponse);
     }
 
     private MetricResponse toResponse(Metric metric) {

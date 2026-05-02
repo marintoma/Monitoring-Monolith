@@ -1,20 +1,21 @@
 package com.app.monitoring.metrics;
 
 import com.app.monitoring.metrics.entity.Metric;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
-import java.util.List;
 
 @Repository
 public interface MetricsRepository extends JpaRepository<Metric, Long> {
 
-    List<Metric> findByServiceName(String serviceName);
+    Page<Metric> findByServiceName(String serviceName, Pageable pageable);
 
-    List<Metric> findByName(String metricName);
+    Page<Metric> findByName(String metricName, Pageable pageable);
 
-    List<Metric> findByTimestampBetween(Instant from, Instant to);
+    Page<Metric> findByTimestampBetween(Instant from, Instant to, Pageable pageable);
 
-    List<Metric> findByServiceNameAndTimestampBetween(String serviceName, Instant from, Instant to);
+    Page<Metric> findByServiceNameAndTimestampBetween(String serviceName, Instant from, Instant to, Pageable pageable);
 }
