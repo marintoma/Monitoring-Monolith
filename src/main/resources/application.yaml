@@ -21,6 +21,21 @@ spring:
   flyway:
     enabled: true
 
+  web:
+    error:
+      include-message: always
+      include-stacktrace: always
+
+management:
+  endpoints:
+    web:
+      base-path: /manage
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: always
+
 app:
   batch:
     max-size: 1000
