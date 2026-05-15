@@ -1,7 +1,7 @@
-package com.app.monitoring.metrics;
+package com.app.monitoring.logs;
 
 import com.app.monitoring.BaseIntegrationTest;
-import com.app.monitoring.metrics.dto.MetricRequest;
+import com.app.monitoring.logs.dto.LogRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -13,106 +13,100 @@ import java.util.List;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-class MetricsControllerTest extends BaseIntegrationTest {
+class LogsControllerTest extends BaseIntegrationTest {
 
-    private final String METRICS_URL = "/api/metrics";
+    private final String LOGS_URL = "/api/logs";
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    void shouldIngestMetricAndReturn201() throws Exception {
-        MetricRequest request = MetricRequest.builder()
-                .name("cpu.usage")
-                .value(72.5)
+    void shouldIngestLogAndReturn201() throws Exception {
+        LogRequest request = LogRequest.builder()
+                .level(LogLevel.ERROR)
+                .message("Database connection failed")
                 .serviceName("auth-service")
                 .timestamp(Instant.now())
                 .build();
 
-        mockMvc.perform(post(METRICS_URL)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(post(LOGS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("cpu.usage"))
-                .andExpect(jsonPath("$.value").value(72.5))
+                .andExpect(jsonPath("$.level").value("ERROR"))
+                .andExpect(jsonPath("$.message").value("Database connection failed"))
                 .andExpect(jsonPath("$.serviceName").value("auth-service"))
                 .andExpect(jsonPath("$.id").isNumber());
-
-
     }
 
     @Test
     void shouldReturnBadRequestWhenFieldsMissing() throws Exception {
-        mockMvc.perform(post(METRICS_URL)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{}"))
+        mockMvc.perform(post(LOGS_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.message").isNotEmpty());
-
     }
 
     @Test
-    void shouldQueryMetricsByServiceName() throws Exception {
-        MetricRequest request = MetricRequest.builder()
-                .name("memory.usage")
-                .value(55.0)
+    void shouldQueryLogsByServiceName() throws Exception {
+        LogRequest request = LogRequest.builder()
+                .level(LogLevel.INFO)
+                .message("Service started")
                 .serviceName("payment-service")
                 .timestamp(Instant.now())
                 .build();
 
-        mockMvc.perform(post(METRICS_URL)
+        mockMvc.perform(post(LOGS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(get(METRICS_URL + "/service/payment-service"))
+        mockMvc.perform(get(LOGS_URL + "/service/payment-service"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content[0].serviceName").value("payment-service"));
     }
 
     @Test
-    void shouldQueryMetricsByTimeRange() throws Exception {
-        Instant now = Instant.now();
-        MetricRequest request = MetricRequest.builder()
-                .name("cpu.usage")
-                .value(60.0)
+    void shouldQueryLogsByLevel() throws Exception {
+        LogRequest request = LogRequest.builder()
+                .level(LogLevel.WARN)
+                .message("High memory usage")
                 .serviceName("order-service")
-                .timestamp(now)
+                .timestamp(Instant.now())
                 .build();
 
-        mockMvc.perform(post(METRICS_URL)
+        mockMvc.perform(post(LOGS_URL)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
 
-        mockMvc.perform(get(METRICS_URL  + "/range")
-                        .param("from", now.minusSeconds(10).toString())
-                        .param("to", now.plusSeconds(10).toString()))
+        mockMvc.perform(get(LOGS_URL + "/level/WARN"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").isNumber());
+                .andExpect(jsonPath("$.content[0].level").value("WARN"));
     }
 
     @Test
     void shouldIngestBatchAndReturn201() throws Exception {
-        List<MetricRequest> requests = List.of(
-                MetricRequest.builder()
-                        .name("cpu.usage")
-                        .value(72.5)
+        List<LogRequest> requests = List.of(
+                LogRequest.builder()
+                        .level(LogLevel.ERROR)
+                        .message("Connection failed")
                         .serviceName("auth-service")
                         .timestamp(Instant.now())
                         .build(),
-                MetricRequest.builder()
-                        .name("memory.usage")
-                        .value(55.0)
+                LogRequest.builder()
+                        .level(LogLevel.INFO)
+                        .message("Service started")
                         .serviceName("auth-service")
                         .timestamp(Instant.now())
                         .build()
         );
 
-        mockMvc.perform(post("/api/metrics/batch")
+        mockMvc.perform(post(LOGS_URL + "/batch")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requests)))
                 .andExpect(status().isCreated())
