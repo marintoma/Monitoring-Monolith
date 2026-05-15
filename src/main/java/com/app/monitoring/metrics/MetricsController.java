@@ -1,5 +1,6 @@
 package com.app.monitoring.metrics;
 
+import com.app.monitoring.common.BatchIngestResponse;
 import com.app.monitoring.common.PageResponse;
 import com.app.monitoring.metrics.dto.MetricRequest;
 import com.app.monitoring.metrics.dto.MetricResponse;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/metrics")
@@ -24,6 +26,12 @@ public class MetricsController {
     @ResponseStatus(HttpStatus.CREATED)
     public MetricResponse ingest(@Valid @RequestBody MetricRequest metricRequest) {
         return service.ingest(metricRequest);
+    }
+
+    @PostMapping("/batch")
+    @ResponseStatus(HttpStatus.CREATED)
+    public BatchIngestResponse ingestBatch(@Valid @RequestBody List<MetricRequest> metricRequests) {
+        return service.ingestBatch(metricRequests);
     }
 
     @GetMapping("/service/{serviceName}")

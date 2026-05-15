@@ -57,4 +57,14 @@ public class GlobalExceptionHandler {
                 .timestamp(Instant.now())
                 .build();
     }
+
+    @ExceptionHandler(BatchSizeExceededException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public APIError handleBatchSizeExceeded(BatchSizeExceededException ex) {
+        return APIError.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .message(ex.getMessage())
+                .timestamp(Instant.now())
+                .build();
+    }
 }

@@ -1,5 +1,6 @@
 package com.app.monitoring.logs;
 
+import com.app.monitoring.common.BatchIngestResponse;
 import com.app.monitoring.common.PageResponse;
 import com.app.monitoring.logs.dto.LogRequest;
 import com.app.monitoring.logs.dto.LogResponse;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/logs")
@@ -24,6 +26,12 @@ public class LogsController {
     @ResponseStatus(HttpStatus.CREATED)
     public LogResponse ingest(@Valid @RequestBody LogRequest request) {
         return service.ingest(request);
+    }
+
+    @PostMapping("/batch")
+    @ResponseStatus(HttpStatus.CREATED)
+    public BatchIngestResponse ingestBatch(@Valid @RequestBody List<LogRequest> requests) {
+        return service.ingestBatch(requests);
     }
 
     @GetMapping("/service/{serviceName}")
